@@ -3,13 +3,13 @@ import { useBuilder } from '../../../context/BuilderContext'
 
 const BuilderElementDesigner = () => {
 
-    const {toggleStyleEditSidebar} = useBuilder()
+    const {styleEditSidebar} = useBuilder()
 
     return (
         <Fragment>
             <aside
                 id="default-sidebar"
-                className={`fixed top-0 right-0 z-40 w-80 h-screen transition-transform -translate-x-full sm:translate-x-0 ${toggleStyleEditSidebar ? "" : "hidden"
+                className={`fixed top-0 right-0 z-40 w-80 h-screen transition-transform -translate-x-full sm:translate-x-0 ${styleEditSidebar ? "" : "hidden"
                     }`}
                 aria-label="Sidebar"
             >

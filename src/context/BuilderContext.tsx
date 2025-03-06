@@ -7,8 +7,8 @@ interface BuilderContextProps {
     setLeftSideBarSelectedTab: React.Dispatch<React.SetStateAction<number>>;
     builderType: number;
     setBuilderType: React.Dispatch<React.SetStateAction<number>>;
-    toggleStyleEditSidebar: boolean;
-    setToggleStyleEditSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+    styleEditSidebar: boolean;
+    setStyleEditSidebar: React.Dispatch<React.SetStateAction<boolean>>;
     toggleLayoutSidebar: boolean;
     setToggleLayoutSidebar: React.Dispatch<React.SetStateAction<boolean>>;
     getMainWidth: () => string;
@@ -24,17 +24,21 @@ const BuilderContext = createContext<BuilderContextProps | undefined>(undefined)
 export const BuilderProvider: React.FC<SidebarProviderProps> = ({ children }) => {
     const [leftSideBarSelectedTab, setLeftSideBarSelectedTab] = useState<number>(0);
     const [builderType, setBuilderType] = useState<number>(0);
-    const [toggleStyleEditSidebar, setToggleStyleEditSidebar] = useState<boolean>(false);
+    const [styleEditSidebar, setStyleEditSidebar] = useState<boolean>(false);
     const [toggleLayoutSidebar, setToggleLayoutSidebar] = useState<boolean>(false);
     useEffect(() => {
-        setToggleLayoutSidebar(false);
-    }, [toggleStyleEditSidebar]);
+        if (styleEditSidebar) {
+            setToggleLayoutSidebar(false);
+        }
+    }, [styleEditSidebar]);
     useEffect(() => {
-        setToggleStyleEditSidebar(false);
+        if (toggleLayoutSidebar) {
+            setStyleEditSidebar(false);
+        }
     }, [toggleLayoutSidebar]);
 
     const getMainWidth = () => {
-        if (toggleLayoutSidebar || toggleStyleEditSidebar) {
+        if (toggleLayoutSidebar || styleEditSidebar) {
             return "w-[calc(100%-350px)]";
         } else {
             return "w-full";
@@ -49,8 +53,8 @@ export const BuilderProvider: React.FC<SidebarProviderProps> = ({ children }) =>
             setLeftSideBarSelectedTab: (value) => setLeftSideBarSelectedTab(value),
             builderType,
             setBuilderType,
-            toggleStyleEditSidebar,
-            setToggleStyleEditSidebar: () => setToggleStyleEditSidebar(!toggleStyleEditSidebar),
+            styleEditSidebar,
+            setStyleEditSidebar,
             toggleLayoutSidebar,
             setToggleLayoutSidebar: () => setToggleLayoutSidebar(!toggleLayoutSidebar),
             getMainWidth,

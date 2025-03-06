@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { BuilderElementsSidebar } from "./BuilderHelper/BuilderElementsSidebar/BuilderElementsSidebar";
 import BuilderElementDesigner from "./BuilderHelper/BuilderElementDesigner/BuilderElementDesigner";
@@ -13,45 +13,264 @@ const Builder = () => {
     builderType,
     setBuilderType,
     getMainWidth,
+    styleEditSidebar,
+    setStyleEditSidebar,
   } = useBuilder();
   const [builderJSON, setBuilderJSON] = useState<PageConfig[]>([]);
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(
+    null
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('[data-builder-element="true"]')) {
+        setSelectedElementId(null);
+        if(styleEditSidebar){
+          setStyleEditSidebar(false)
+        }
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleDragOver = (event: React.DragEvent) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
   };
-  const handleDrop = (event: React.DragEvent) => {
+
+  const findAndUpdateComponent = (
+    components: BuilderComponent[],
+    targetId: string,
+    newChild: BuilderComponent
+  ): boolean => {
+    for (let component of components) {
+      if (component.id === targetId) {
+        component.children.push(newChild);
+        return true;
+      }
+      if (component.children && component.children.length > 0) {
+        if (findAndUpdateComponent(component.children, targetId, newChild)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  const handleDrop = (event: React.DragEvent, targetId?: string) => {
     event.preventDefault();
+    event.stopPropagation();
     try {
       const data = JSON.parse(event.dataTransfer.getData("application/json"));
-      if (setBuilderJSON.length) {
-        const newComponent: BuilderComponent = {
-          id: uuidv4(),
-          name: data.component,
-          type: data.type,
-          canHaveChildren: true,
-          children: [],
-        };
+
+      const newComponent: BuilderComponent = {
+        id: uuidv4(),
+        name: data.component,
+        type: data.type,
+        canHaveChildren: true,
+        className: "",
+        defaultBuilderClassName: `border-2 border-dashed border-indigo-400 ${
+          data.type === "div" ? "h-[200px]" : "p-3"
+        }`,
+        useDefaultClassName: true,
+        children: [],
+      };
+
+      if (targetId && builderJSON.length > 0) {
+        // Add to nested children
+        const updated = findAndUpdateComponent(
+          builderJSON[0].children,
+          targetId,
+          newComponent
+        );
+        if (updated) {
+          setBuilderJSON([...builderJSON]);
+        }
+      } else if (builderJSON.length) {
+        // Add to root level
         builderJSON[0].children.push(newComponent);
         setBuilderJSON([...builderJSON]);
       } else {
+        // Create new page
         const pageConstructor: PageConfig = {
           id: uuidv4(),
           name: "page-1",
-          children: [
-            {
-              id: uuidv4(),
-              name: data.component,
-              type: data.type,
-              canHaveChildren: true,
-              children: [],
-            },
-          ],
+          children: [newComponent],
         };
         setBuilderJSON([pageConstructor]);
       }
     } catch (error) {
       console.error("Error parsing drop data:", error);
+    }
+  };
+
+  const renderComponent = (component: BuilderComponent) => {
+    const isSelected = selectedElementId === component.id;
+
+    const commonProps = {
+      key: component.id,
+      "data-builder-element": "true",
+      onClick: (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setSelectedElementId(component.id);
+        setStyleEditSidebar(true)
+      },
+      onDrop: (e: React.DragEvent) => handleDrop(e, component.id),
+      onDragOver: (e: React.DragEvent) => e.preventDefault(),
+      className: `
+      relative
+      group
+      ${
+        component.useDefaultClassName
+          ? component.defaultBuilderClassName
+          : component.className
+      }
+      ${isSelected ? "border-blue-500 border-2" : ""}
+      `,
+    };
+
+    const elementLabel = (
+      <div
+        className={`
+        absolute -top-7 left-0 
+        bg-blue-500 text-white px-2 py-1 text-xs rounded
+        ${isSelected ? "block" : "hidden group-hover:block"}
+      `}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {component.name}
+      </div>
+    );
+
+    switch (component.name) {
+      case "FlexBox":
+        return (
+          <div
+            {...commonProps}
+            key={component.id}
+            className={`flex flex-wrap p-3 items-center justify-center ${commonProps.className}`}
+          >
+            {elementLabel}
+            {component.children &&
+              component.children.map((child) => renderComponent(child))}
+          </div>
+        );
+      case "JustifyBetweenFlexBox":
+        return (
+          <div
+            {...commonProps}
+            key={component.id}
+            className={`flex flex-wrap p-3 items-center justify-between ${commonProps.className}`}
+          >
+            {elementLabel}
+            {component.children &&
+              component.children.map((child) => renderComponent(child))}
+          </div>
+        );
+      case "JustifyAroundFlexBox":
+        return (
+          <div
+            {...commonProps}
+            key={component.id}
+            className={`flex flex-wrap p-3 items-center justify-around ${commonProps.className}`}
+          >
+            {elementLabel}
+            {component.children &&
+              component.children.map((child) => renderComponent(child))}
+          </div>
+        );
+      case "h1":
+        return (
+          <h1
+            {...commonProps}
+            key={component.id}
+            className={`${commonProps.className}`}
+          >
+            {elementLabel}
+            {component.props?.text || "Hello World"}
+          </h1>
+        );
+      case "h2":
+        return (
+          <h2
+            {...commonProps}
+            key={component.id}
+            className={`${commonProps.className}`}
+          >
+            {elementLabel}
+            {component.props?.text || "Hello World"}
+          </h2>
+        );
+      case "h3":
+        return (
+          <h3
+            {...commonProps}
+            key={component.id}
+            className={`${commonProps.className}`}
+          >
+            {elementLabel}
+            {component.props?.text || "Hello World"}
+          </h3>
+        );
+      case "h4":
+        return (
+          <h4
+            {...commonProps}
+            key={component.id}
+            className={`${commonProps.className}`}
+          >
+            {elementLabel}
+            {component.props?.text || "Hello World"}
+          </h4>
+        );
+      case "h5":
+        return (
+          <h5
+            {...commonProps}
+            key={component.id}
+            className={`${commonProps.className}`}
+          >
+            {elementLabel}
+            {component.props?.text || "Hello World"}
+          </h5>
+        );
+      case "h6":
+        return (
+          <h6
+            {...commonProps}
+            key={component.id}
+            className={`${commonProps.className}`}
+          >
+            {elementLabel}
+            {component.props?.text || "Hello World"}
+          </h6>
+        );
+      case "p":
+        return (
+          <p
+            {...commonProps}
+            key={component.id}
+            className={`${commonProps.className}`}
+          >
+            {elementLabel}
+            {component.props?.text || "Hello World"}
+          </p>
+        );
+      case "img":
+        return (
+          <img
+            {...commonProps}
+            key={component.id}
+            src={component.props?.src || "https://placehold.co/600x400"}
+            alt={component.props?.alt}
+            className={`${commonProps.className}`}
+          />
+        );
+      default:
+        return null;
     }
   };
   return (
@@ -113,7 +332,11 @@ const Builder = () => {
             onDrop={handleDrop}
             onDragOver={handleDragOver}
           >
-            {/* Drop zone content */}
+            {builderJSON.map((page) => (
+              <div key={page.id} className="min-h-screen p-4">
+                {page.children.map((component) => renderComponent(component))}
+              </div>
+            ))}
           </div>
         </div>
       </main>

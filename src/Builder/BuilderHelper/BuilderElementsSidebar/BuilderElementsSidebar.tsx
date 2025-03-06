@@ -17,22 +17,27 @@ export const BuilderElementsSidebar = () => {
     leftSideBarSelectedTab,
   } = useBuilder();
 
-  const handleDragStart = (event: React.DragEvent, component: string , type : string) => {
-    event.dataTransfer.setData('application/json', JSON.stringify({
-      component,
-      type: type
-    }));
+  const handleDragStart = (
+    event: React.DragEvent,
+    component: string,
+    type: string
+  ) => {
+    event.dataTransfer.setData(
+      "application/json",
+      JSON.stringify({
+        component,
+        type: type,
+      })
+    );
   };
-  
+
   const components: DraggableComponentProps[] = [
     {
       type: "div",
       canHaveChildren: true,
-      component : "FlexBox",
+      component: "FlexBox",
       design: (
-        <div
-          className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab"
-        >
+        <div className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
           <div className="border-2 border-dashed rounded-lg border-indigo-400 p-3">
             <Icon icon={"bx:bx-plus"} className="w-6 h-6 text-indigo-400" />
           </div>
@@ -44,9 +49,7 @@ export const BuilderElementsSidebar = () => {
       canHaveChildren: true,
       component: "JustifyBetweenFlexBox",
       design: (
-        <div
-          className="flex flex-1/2 flex-wrap p-3 items-center justify-between border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab"
-        >
+        <div className="flex flex-1/2 flex-wrap p-3 items-center justify-between border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
           <div className="border-2 border-dashed rounded-lg border-indigo-400 p-3">
             <Icon icon={"bx:bx-plus"} className="w-6 h-6 text-indigo-400" />
           </div>
@@ -61,9 +64,7 @@ export const BuilderElementsSidebar = () => {
       component: "JustifyAroundFlexBox",
       canHaveChildren: true,
       design: (
-        <div
-          className="flex flex-1/2 flex-wrap p-3 items-center justify-around border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab"
-        >
+        <div className="flex flex-1/2 flex-wrap p-3 items-center justify-around border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
           <div className="border-2 border-dashed rounded-lg border-indigo-400 p-3">
             <Icon icon={"bx:bx-plus"} className="w-6 h-6 text-indigo-400" />
           </div>
@@ -75,7 +76,112 @@ export const BuilderElementsSidebar = () => {
     },
   ];
 
-
+  const Elements: DraggableComponentProps[] = [
+    {
+      type: "text",
+      canHaveChildren: true,
+      component: "h1",
+      design: (
+        <div className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
+          <Icon
+            icon={"heroicons:h1-16-solid"}
+            className="w-6 h-6 text-indigo-400"
+          />
+        </div>
+      ),
+    },
+    {
+      type: "text",
+      canHaveChildren: true,
+      component: "h2",
+      design: (
+        <div className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
+          <Icon
+            icon={"heroicons:h2-16-solid"}
+            className="w-6 h-6 text-indigo-400"
+          />
+        </div>
+      ),
+    },
+    {
+      type: "text",
+      canHaveChildren: true,
+      component: "h3",
+      design: (
+        <div className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
+          <Icon
+            icon={"heroicons:h3-16-solid"}
+            className="w-6 h-6 text-indigo-400"
+          />
+        </div>
+      ),
+    },
+    {
+      type: "text",
+      canHaveChildren: true,
+      component: "h4",
+      design: (
+        <div className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
+          <Icon
+            icon={"material-symbols:format-h4-rounded"}
+            className="w-6 h-6 text-indigo-400"
+          />
+        </div>
+      ),
+    },
+    {
+      type: "text",
+      canHaveChildren: true,
+      component: "h5",
+      design: (
+        <div className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
+          <Icon
+            icon={"material-symbols:format-h5-rounded"}
+            className="w-6 h-6 text-indigo-400"
+          />
+        </div>
+      ),
+    },
+    {
+      type: "text",
+      canHaveChildren: true,
+      component: "h6",
+      design: (
+        <div className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
+          <Icon
+            icon={"material-symbols:format-h6-rounded"}
+            className="w-6 h-6 text-indigo-400"
+          />
+        </div>
+      ),
+    },
+    {
+      type: "text",
+      canHaveChildren: true,
+      component: "p",
+      design: (
+        <div className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
+          <Icon
+            icon={"mdi:format-paragraph"}
+            className="w-6 h-6 text-indigo-400"
+          />
+        </div>
+      ),
+    },
+    {
+      type: "image",
+      canHaveChildren: true,
+      component: "img",
+      design: (
+        <div className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
+          <Icon
+            icon={"mynaui:image"}
+            className="w-6 h-6 text-indigo-400"
+          />
+        </div>
+      ),
+    },
+  ];
 
   return (
     <Fragment>
@@ -142,10 +248,12 @@ export const BuilderElementsSidebar = () => {
 
           {leftSideBarSelectedTab === 0 && (
             <div className="flex flex-col gap-2 p-2">
-              {components.map((component , index) => (
-                <div 
-                  key={index} 
-                  onDragStart={(e) => handleDragStart(e, component.component , component.type)} 
+              {components.map((component, index) => (
+                <div
+                  key={index}
+                  onDragStart={(e) =>
+                    handleDragStart(e, component.component, component.type)
+                  }
                   draggable={true}
                   className="cursor-grab active:cursor-grabbing"
                 >
@@ -154,7 +262,22 @@ export const BuilderElementsSidebar = () => {
               ))}
             </div>
           )}
-          {leftSideBarSelectedTab === 1 && <h1>Elements</h1>}
+          {leftSideBarSelectedTab === 1 && (
+            <div className="flex flex-wrap gap-2 p-2 items-center justify-center">
+              {Elements.map((component, index) => (
+                <div
+                  key={index}
+                  onDragStart={(e) =>
+                    handleDragStart(e, component.component, component.type)
+                  }
+                  draggable={true}
+                  className="cursor-grab active:cursor-grabbing"
+                >
+                  {component.design}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </aside>
     </Fragment>

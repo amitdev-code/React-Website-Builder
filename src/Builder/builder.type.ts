@@ -224,7 +224,9 @@ export interface BuilderComponent {
     alt?: string;
     href?: string;
   };
-  tailwindClasses?: string;
+  className?: string;
+  defaultBuilderClassName?: string;
+  useDefaultClassName?: boolean;
   styles?: {
     mobile?: ComponentStyles;
     tablet?: ComponentStyles;
