@@ -17,12 +17,15 @@ const Builder = () => {
     setStyleEditSidebar,
   } = useBuilder();
   const [builderJSON, setBuilderJSON] = useState<PageConfig[]>([]);
+  const [renderJSON, setRenderJSON] = useState<PageConfig[]>([]);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(
     null
   );
   const [dragOverElementId, setDragOverElementId] = useState<string | null>(
     null
   );
+
+  console.log(renderJSON);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -40,9 +43,113 @@ const Builder = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const manageRenderJSON = (builderJSONData: PageConfig[]) => {
+    if (!builderJSONData.length) return [];
+    // Deep clone the builderJSONData to avoid mutations
+    const processedJSON: PageConfig[] = JSON.parse(
+      JSON.stringify(builderJSONData)
+    );
+
+    const processComponent = (
+      component: BuilderComponent
+    ): BuilderComponent => {
+      // Initialize className if it doesn't exist
+      let className = component.className || "";
+
+      // Process styles and convert to Tailwind classes
+      if (component.styles) {
+        // Process desktop styles (default)
+        if (component.styles.desktop) {
+          // Process padding
+          if (component.styles.desktop.axisPadding?.x) {
+            className += ` px-${component.styles.desktop.axisPadding.x}`;
+          }
+          if (component.styles.desktop.axisPadding?.y) {
+            className += ` py-${component.styles.desktop.axisPadding.y}`;
+          }
+
+          // Process margin
+          if (component.styles.desktop.axisMargin?.x) {
+            className += ` mx-${component.styles.desktop.axisMargin.x}`;
+          }
+          if (component.styles.desktop.axisMargin?.y) {
+            className += ` my-${component.styles.desktop.axisMargin.y}`;
+          }
+
+          // Process typography
+          if (component.styles.desktop.typography?.fontSize) {
+            className += ` text-${component.styles.desktop.typography.fontSize}`;
+          }
+          if (component.styles.desktop.typography?.fontWeight) {
+            className += ` font-${component.styles.desktop.typography.fontWeight}`;
+          }
+          if (component.styles.desktop.typography?.textAlign) {
+            className += ` text-${component.styles.desktop.typography.textAlign}`;
+          }
+
+          // Process colors and background
+          if (component.styles.desktop.background?.background) {
+            className += ` bg-${component.styles.desktop.background.background}`;
+          }
+
+          // Process sizing
+          if (component.styles.desktop.sizing?.width) {
+            className += ` w-${component.styles.desktop.sizing.width}`;
+          }
+          if (component.styles.desktop.sizing?.height) {
+            className += ` h-${component.styles.desktop.sizing.height}`;
+          }
+
+          // Process flex properties
+          if (component.styles.desktop.flex?.flexDirection) {
+            className += ` flex-${component.styles.desktop.flex.flexDirection}`;
+          }
+          if (component.styles.desktop.flex?.justifyContent) {
+            className += ` justify-${component.styles.desktop.flex.justifyContent}`;
+          }
+          if (component.styles.desktop.flex?.alignItems) {
+            className += ` items-${component.styles.desktop.flex.alignItems}`;
+          }
+
+          // Process border
+          if (component.styles.desktop.border?.borderRadius) {
+            className += ` rounded-${component.styles.desktop.border.borderRadius}`;
+          }
+        }
+
+        // Add responsive classes for tablet and mobile if needed
+        // For tablet: md:class-name
+        // For mobile: sm:class-name
+      }
+
+      // Update the component's className
+      component.className = className.trim();
+      component.useDefaultClassName = false;
+
+      // Process children recursively
+      if (component.children && component.children.length > 0) {
+        component.children = component.children.map(processComponent);
+      }
+
+      return component;
+    };
+
+    // Process all components in all pages
+    processedJSON.forEach((page) => {
+      page.children = page.children.map(processComponent);
+    });
+
+    return processedJSON;
+  };
+
+  useEffect(() => {
+    setRenderJSON(manageRenderJSON(builderJSON));
+  }, [builderJSON]);
+
   const handleDragOver = (
     event: React.DragEvent,
     componentId?: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     canHaveChildren?: boolean
   ) => {
     event.preventDefault();
@@ -172,12 +279,18 @@ const Builder = () => {
       <div
         className={`
         absolute -top-7 left-0 
-        bg-blue-500 text-white px-2 py-1 text-xs rounded
+        bg-sky-500/60 px-2 py-1 text-xs rounded
         ${isSelected ? "block" : "hidden group-hover:block"}
       `}
         onClick={(e) => e.stopPropagation()}
       >
-        {component.name}
+        <div className="flex align-center justify-between">
+          {component.name}
+          <Icon
+            icon={"proicons:delete"}
+            className="h-5 w-5 mx-2 cursor-pointer text-red-500"
+          />
+        </div>
       </div>
     );
 
