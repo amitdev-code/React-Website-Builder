@@ -20,12 +20,14 @@ export const BuilderElementsSidebar = () => {
   const handleDragStart = (
     event: React.DragEvent,
     component: string,
-    type: string
+    type: string,
+    canHaveChildren: boolean
   ) => {
     event.dataTransfer.setData(
       "application/json",
       JSON.stringify({
         component,
+        canHaveChildren,
         type: type,
       })
     );
@@ -79,7 +81,7 @@ export const BuilderElementsSidebar = () => {
   const Elements: DraggableComponentProps[] = [
     {
       type: "text",
-      canHaveChildren: true,
+      canHaveChildren: false,
       component: "h1",
       design: (
         <div className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
@@ -92,7 +94,7 @@ export const BuilderElementsSidebar = () => {
     },
     {
       type: "text",
-      canHaveChildren: true,
+      canHaveChildren: false,
       component: "h2",
       design: (
         <div className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
@@ -105,7 +107,7 @@ export const BuilderElementsSidebar = () => {
     },
     {
       type: "text",
-      canHaveChildren: true,
+      canHaveChildren: false,
       component: "h3",
       design: (
         <div className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
@@ -118,7 +120,7 @@ export const BuilderElementsSidebar = () => {
     },
     {
       type: "text",
-      canHaveChildren: true,
+      canHaveChildren: false,
       component: "h4",
       design: (
         <div className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
@@ -131,7 +133,7 @@ export const BuilderElementsSidebar = () => {
     },
     {
       type: "text",
-      canHaveChildren: true,
+      canHaveChildren: false,
       component: "h5",
       design: (
         <div className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
@@ -144,7 +146,7 @@ export const BuilderElementsSidebar = () => {
     },
     {
       type: "text",
-      canHaveChildren: true,
+      canHaveChildren: false,
       component: "h6",
       design: (
         <div className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
@@ -170,14 +172,11 @@ export const BuilderElementsSidebar = () => {
     },
     {
       type: "image",
-      canHaveChildren: true,
+      canHaveChildren: false,
       component: "img",
       design: (
         <div className="flex flex-wrap p-3 items-center justify-center border-2 border-dashed rounded-lg border-indigo-400 dark:border-gray-700 cursor-grab">
-          <Icon
-            icon={"mynaui:image"}
-            className="w-6 h-6 text-indigo-400"
-          />
+          <Icon icon={"mynaui:image"} className="w-6 h-6 text-indigo-400" />
         </div>
       ),
     },
@@ -252,7 +251,12 @@ export const BuilderElementsSidebar = () => {
                 <div
                   key={index}
                   onDragStart={(e) =>
-                    handleDragStart(e, component.component, component.type)
+                    handleDragStart(
+                      e,
+                      component.component,
+                      component.type,
+                      component.canHaveChildren
+                    )
                   }
                   draggable={true}
                   className="cursor-grab active:cursor-grabbing"
@@ -268,7 +272,12 @@ export const BuilderElementsSidebar = () => {
                 <div
                   key={index}
                   onDragStart={(e) =>
-                    handleDragStart(e, component.component, component.type)
+                    handleDragStart(
+                      e,
+                      component.component,
+                      component.type,
+                      component.canHaveChildren
+                    )
                   }
                   draggable={true}
                   className="cursor-grab active:cursor-grabbing"

@@ -20,25 +20,42 @@ const Builder = () => {
   const [selectedElementId, setSelectedElementId] = useState<string | null>(
     null
   );
+  const [dragOverElementId, setDragOverElementId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       if (!target.closest('[data-builder-element="true"]')) {
         setSelectedElementId(null);
-        if(styleEditSidebar){
-          setStyleEditSidebar(false)
+        if (styleEditSidebar) {
+          setStyleEditSidebar(false);
         }
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleDragOver = (event: React.DragEvent) => {
+  const handleDragOver = (
+    event: React.DragEvent,
+    componentId?: string,
+    canHaveChildren?: boolean
+  ) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
+
+    if (componentId) {
+      setDragOverElementId(componentId);
+    }
+  };
+
+  const handleDragLeave = (event: React.DragEvent) => {
+    event.preventDefault();
+    setDragOverElementId(null);
   };
 
   const findAndUpdateComponent = (
@@ -46,9 +63,9 @@ const Builder = () => {
     targetId: string,
     newChild: BuilderComponent
   ): boolean => {
-    for (let component of components) {
+    for (const component of components) {
       if (component.id === targetId) {
-        component.children.push(newChild);
+        component?.children?.push(newChild);
         return true;
       }
       if (component.children && component.children.length > 0) {
@@ -70,7 +87,7 @@ const Builder = () => {
         id: uuidv4(),
         name: data.component,
         type: data.type,
-        canHaveChildren: true,
+        canHaveChildren: data.canHaveChildren,
         className: "",
         defaultBuilderClassName: `border-2 border-dashed border-indigo-400 ${
           data.type === "div" ? "h-[200px]" : "p-3"
@@ -109,17 +126,29 @@ const Builder = () => {
 
   const renderComponent = (component: BuilderComponent) => {
     const isSelected = selectedElementId === component.id;
-
+    const isDraggedOver = dragOverElementId === component.id;
     const commonProps = {
       key: component.id,
       "data-builder-element": "true",
-      onClick: (e: React.MouseEvent) => {
+      nClick: (e: React.MouseEvent) => {
         e.stopPropagation();
         setSelectedElementId(component.id);
-        setStyleEditSidebar(true)
+        setStyleEditSidebar(true);
       },
-      onDrop: (e: React.DragEvent) => handleDrop(e, component.id),
-      onDragOver: (e: React.DragEvent) => e.preventDefault(),
+      onDrop: (e: React.DragEvent) => {
+        handleDrop(e, component.id);
+        setDragOverElementId(null); // Reset drag state after drop
+      },
+      onDragOver: (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleDragOver(e, component.id, component.canHaveChildren);
+      },
+      onDragLeave: (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleDragLeave(e);
+      },
       className: `
       relative
       group
@@ -129,7 +158,14 @@ const Builder = () => {
           : component.className
       }
       ${isSelected ? "border-blue-500 border-2" : ""}
-      `,
+      ${
+        isDraggedOver
+          ? component.canHaveChildren
+            ? "!border-green-500 !border-2"
+            : "!border-red-500 !border-2"
+          : ""
+      }
+    `,
     };
 
     const elementLabel = (
@@ -326,14 +362,15 @@ const Builder = () => {
         } ${getMainWidth()}`}
       >
         {/* MAIN WEBSITE DESIGN */}
-        <div className="z-3 h-screen bg-white-500 m-1">
+        <div className="z-3 h-screen bg-white-500 m-1 mt-[20px]">
           <div
             className="overflow-y-auto bg-white h-full"
             onDrop={handleDrop}
-            onDragOver={handleDragOver}
+            onDragOver={(e) => handleDragOver(e)}
+            onDragLeave={handleDragLeave}
           >
             {builderJSON.map((page) => (
-              <div key={page.id} className="min-h-screen p-4">
+              <div key={page.id} className="min-h-screen p-4 mt-3">
                 {page.children.map((component) => renderComponent(component))}
               </div>
             ))}
