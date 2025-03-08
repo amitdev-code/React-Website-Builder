@@ -25,8 +25,6 @@ const Builder = () => {
     null
   );
 
-  console.log(renderJSON);
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -49,95 +47,6 @@ const Builder = () => {
     const processedJSON: PageConfig[] = JSON.parse(
       JSON.stringify(builderJSONData)
     );
-
-    const processComponent = (
-      component: BuilderComponent
-    ): BuilderComponent => {
-      // Initialize className if it doesn't exist
-      let className = component.className || "";
-
-      // Process styles and convert to Tailwind classes
-      if (component.styles) {
-        // Process desktop styles (default)
-        if (component.styles.desktop) {
-          // Process padding
-          if (component.styles.desktop.axisPadding?.x) {
-            className += ` px-${component.styles.desktop.axisPadding.x}`;
-          }
-          if (component.styles.desktop.axisPadding?.y) {
-            className += ` py-${component.styles.desktop.axisPadding.y}`;
-          }
-
-          // Process margin
-          if (component.styles.desktop.axisMargin?.x) {
-            className += ` mx-${component.styles.desktop.axisMargin.x}`;
-          }
-          if (component.styles.desktop.axisMargin?.y) {
-            className += ` my-${component.styles.desktop.axisMargin.y}`;
-          }
-
-          // Process typography
-          if (component.styles.desktop.typography?.fontSize) {
-            className += ` text-${component.styles.desktop.typography.fontSize}`;
-          }
-          if (component.styles.desktop.typography?.fontWeight) {
-            className += ` font-${component.styles.desktop.typography.fontWeight}`;
-          }
-          if (component.styles.desktop.typography?.textAlign) {
-            className += ` text-${component.styles.desktop.typography.textAlign}`;
-          }
-
-          // Process colors and background
-          if (component.styles.desktop.background?.background) {
-            className += ` bg-${component.styles.desktop.background.background}`;
-          }
-
-          // Process sizing
-          if (component.styles.desktop.sizing?.width) {
-            className += ` w-${component.styles.desktop.sizing.width}`;
-          }
-          if (component.styles.desktop.sizing?.height) {
-            className += ` h-${component.styles.desktop.sizing.height}`;
-          }
-
-          // Process flex properties
-          if (component.styles.desktop.flex?.flexDirection) {
-            className += ` flex-${component.styles.desktop.flex.flexDirection}`;
-          }
-          if (component.styles.desktop.flex?.justifyContent) {
-            className += ` justify-${component.styles.desktop.flex.justifyContent}`;
-          }
-          if (component.styles.desktop.flex?.alignItems) {
-            className += ` items-${component.styles.desktop.flex.alignItems}`;
-          }
-
-          // Process border
-          if (component.styles.desktop.border?.borderRadius) {
-            className += ` rounded-${component.styles.desktop.border.borderRadius}`;
-          }
-        }
-
-        // Add responsive classes for tablet and mobile if needed
-        // For tablet: md:class-name
-        // For mobile: sm:class-name
-      }
-
-      // Update the component's className
-      component.className = className.trim();
-      component.useDefaultClassName = false;
-
-      // Process children recursively
-      if (component.children && component.children.length > 0) {
-        component.children = component.children.map(processComponent);
-      }
-
-      return component;
-    };
-
-    // Process all components in all pages
-    processedJSON.forEach((page) => {
-      page.children = page.children.map(processComponent);
-    });
 
     return processedJSON;
   };
@@ -230,6 +139,7 @@ const Builder = () => {
       console.error("Error parsing drop data:", error);
     }
   };
+console.log(selectedElementId);
 
   const renderComponent = (component: BuilderComponent) => {
     const isSelected = selectedElementId === component.id;
@@ -237,8 +147,9 @@ const Builder = () => {
     const commonProps = {
       key: component.id,
       "data-builder-element": "true",
-      nClick: (e: React.MouseEvent) => {
+      onClick: (e: React.MouseEvent) => {
         e.stopPropagation();
+        e.preventDefault();
         setSelectedElementId(component.id);
         setStyleEditSidebar(true);
       },
@@ -482,7 +393,7 @@ const Builder = () => {
             onDragOver={(e) => handleDragOver(e)}
             onDragLeave={handleDragLeave}
           >
-            {builderJSON.map((page) => (
+            {renderJSON.map((page) => (
               <div key={page.id} className="min-h-screen p-4 mt-3">
                 {page.children.map((component) => renderComponent(component))}
               </div>
@@ -490,7 +401,7 @@ const Builder = () => {
           </div>
         </div>
       </main>
-      <BuilderElementDesigner />
+      <BuilderElementDesigner selectedItem={selectedElementId} builderJSON={builderJSON} />
     </Fragment>
   );
 };
